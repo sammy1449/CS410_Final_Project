@@ -58,23 +58,56 @@ CREATE TABLE Gradebook (
     INDEX (Assignment_ID)
 );
 
-
+select * from Assignments;
+Select * From Class;
+Select * from Students;
+select * from Enrolled;
+select * from Gradebook;
 
 DELIMITER $$
-
 CREATE PROCEDURE New_Class(IN c_num VARCHAR(6), term VARCHAR(6), sec_num INTEGER, ds VARCHAR(100))
 BEGIN
 	INSERT INTO Class (Course_number, Term, Section_Number, C_Description) values (c_num, term, sec_num, ds);
 END $$
-
 DELIMITER ;
 
 CALL New_Class('CS410', 'SP20', 1, 'Databases');
 
+DELIMITER $$
+CREATE PROCEDURE list_classes()
+BEGIN
+	SELECT Class.Class_ID,Course_Number, Term, Section_Number, COUNT(Student_ID)
+	FROM Class JOIN Enrolled ON (Class.Class_ID = Enrolled.Class_ID)
+	GROUP BY Class.Class_ID, Course_Number, Term, Section_Number;
+END $$
+DELIMITER ;
 
-Select * From Class;
+CALL list_classes();
 
+DELIMITER $$
+CREATE PROCEDURE select_class(in c_num VARCHAR(6))
+BEGIN
+SELECT * FROM Class WHERE Course_Number = c_num;
+END $$
+DELIMITER ;
 
+CALL select_class('CS410');
 
+DELIMITER $$
+CREATE PROCEDURE select_class2(in c_num VARCHAR(6), term VARCHAR(6))
+BEGIN
+SELECT * FROM Class WHERE Course_Number = c_num && Term = term;
+END $$
+DELIMITER ;
 
+CALL select_class2('CS410', 'SP20');
+
+DELIMITER $$
+CREATE PROCEDURE select_class3(in c_num VARCHAR(6), term VARCHAR(6), sec_num INTEGER)
+BEGIN
+SELECT * FROM Class WHERE Course_Number = c_num && Term = term && Section_Number = sec_num;
+END $$
+DELIMITER ;
+
+CALL select_class3('CS410', 'SP20', '1');
 
