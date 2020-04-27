@@ -1,5 +1,6 @@
 import java.sql.Connection;
 import java.sql.DriverManager;
+import com.mysql.jdbc.Driver;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
@@ -633,7 +634,7 @@ class project {
 				}
 			}
 
-			Class.forName("com.mysql.cj.jdbc.Driver");
+			Class.forName("com.mysql.jdbc.Driver");
 			System.out.println();
 			System.out.println("JDBC driver loaded");
     Connection conn = makeConnection("57036", "Final","Nightwing0225");
