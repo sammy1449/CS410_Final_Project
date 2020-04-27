@@ -43,15 +43,15 @@ class project {
 		return null;
 	}
 
-	public static void runGetClassStudentsByCode(Connection conn, String code) {
+	public static void runlistclasses(Connection conn) {
 
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 
 		try {
 				// be sure to call the appropriate procedure based on the function youre running
-			stmt = conn.prepareStatement("call GetClassStudentsByCode(?)");
-			stmt.setString(1, code); // input parameter
+			stmt = conn.prepareStatement("call list_classes()");
+			//stmt.setString(1, code); // input parameter
 			
       		boolean isResultSet = stmt.execute();    
       		if(isResultSet) {
@@ -65,6 +65,8 @@ class project {
 				System.out.println(rs.getInt(1) 
 						+ ":" + rs.getString(2) 
 						+ ":" + rs.getString(3) 
+						+ ":" + rs.getInt(4)
+						+ ":" + rs.getString(5)
 						);
 			}
 		} catch (SQLException ex) {
@@ -631,7 +633,7 @@ class project {
 				}
 			}
 
-			Class.forName("com.mysql.jdbc.Driver").newInstance();
+			Class.forName("com.mysql.cj.jdbc.Driver");
 			System.out.println();
 			System.out.println("JDBC driver loaded");
     Connection conn = makeConnection("57036", "Final","Nightwing0225");
@@ -640,11 +642,11 @@ class project {
 // when the getdata request is made 
 // at the command line
 
-			if (args.length >= 2 && args.length <= 4)
+			if (args.length >= 1 && args.length <= 4)
 			{
-			 	if(args[0].equals("CreateItem")) {
-			 		System.out.println("Running CreateItem");
-			 		runCreateItem(conn, args[1], args[2], args[3]);
+			 	if(args[0].equals("ListClasses")) {
+			 		System.out.println("Running ListClasses");
+			 		runlistclasses(conn);
 			 	}
 			 	else if(args[0].equals("CreatePurchase")) {
 			 		System.out.println("Running CreatePurchase");
