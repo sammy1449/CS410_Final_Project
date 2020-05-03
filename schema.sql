@@ -26,12 +26,22 @@ CREATE TABLE Assignments (
 	Assignment_ID INTEGER PRIMARY KEY AUTO_INCREMENT,
     Class_ID INTEGER NOT NULL REFERENCES Class,
     A_Name VARCHAR(50) UNIQUE NOT NULL,
-    Category VARCHAR(10) NOT NULL,
+    Category_ID INTEGER NOT NULL REFERENCES Category,
     A_Description TINYTEXT NOT NULL,
-    Weight DOUBLE NOT NULL,
     Points INTEGER NOT NULL,
     
+    FOREIGN KEY (Category_ID) REFERENCES Category(Category_ID),
+    INDEX(Category_ID),
 	FOREIGN KEY (Class_ID) REFERENCES Class (Class_ID),
+	INDEX (Class_ID)
+);
+
+CREATE TABLE Category(
+	Category_ID INTEGER PRIMARY KEY AUTO_INCREMENT,
+    Class_ID INTEGER NOT NULL REFERENCES Class,
+    Category_Name VARCHAR(20) UNIQUE NOT NULL,
+    Weight DOUBLE NOT NULL,
+    FOREIGN KEY (Class_ID) REFERENCES Class (Class_ID),
 	INDEX (Class_ID)
 );
 
@@ -57,12 +67,6 @@ CREATE TABLE Gradebook (
     INDEX (Student_ID),
     INDEX (Assignment_ID)
 );
-
-select * from Assignments;
-Select * From Class;
-Select * from Students;
-select * from Enrolled;
-select * from Gradebook;
 
 DELIMITER $$
 CREATE PROCEDURE new_class(IN c_num VARCHAR(6), term VARCHAR(6), sec_num INTEGER, ds VARCHAR(100))
@@ -110,4 +114,107 @@ END $$
 DELIMITER ;
 
 CALL select_class3('CS410', 'SP20', '1');
+
+select * from Category;
+select * from Assignments;
+Select * From Class;
+Select * from Students;
+select * from Enrolled;
+select * from Gradebook;
+
+#show-categories
+DELIMITER $$
+CREATE PROCEDURE show_categories(in c_id INTEGER)
+BEGIN
+SELECT * FROM Category WHERE Class_ID = c_id;
+END $$
+DELIMITER ;
+
+Call show_categories('1');
+
+#add-category Name weight
+DELIMITER $$
+CREATE PROCEDURE add_category(in c_id INTEGER, cat_name VARCHAR(20), weight Double)
+BEGIN
+INSERT INTO Category (Class_ID, Category_Name, Weight) values (c_id, cat_name, weight);
+END $$
+DELIMITER ;
+
+Call add_category('1', 'Homework','35.00');
+
+
+#show-assignment
+DELIMITER $$
+CREATE PROCEDURE show_assignment(in c_id INTEGER)
+BEGIN
+SELECT A_Name, Points, Category_Name
+FROM Assignments JOIN Category ON (Assignments.Category_ID = Category.Category_ID)
+WHERE Category.Class_ID = c_id
+GROUP BY A_Name, Points, Category_Name;
+END $$
+DELIMITER ;
+
+Call show_assignment('1');
+
+#add-assignment name Category Description points
+DELIMITER $$
+CREATE PROCEDURE add_assignment(in c_id INTEGER, a_name VARCHAR(50), cat_name VARCHAR(20), a_des TINYTEXT, points INTEGER)
+BEGIN
+Insert into Assignments(Class_ID, A_Name, Category_ID, A_Description, Points) values (c_id, a_name, 
+(select Category_ID 
+from Category 
+where Category_Name = cat_name && Class_ID = c_id), a_des, points);
+END $$
+DELIMITER ;
+
+Call add_assignment('1', 'Assignment 1', 'Homework', 'ERModel Diagram', '100');
+
+#add-student username studentid Last First
+#check if username exits
+Select Student_ID From Students Where Username = 'jd5001';
+#checks if f&l name exits
+Select Student_ID From Students Where Username = 'jd5001' && S_FName = 'Jane' && S_LName = 'Doe'; 
+#if not, then add them
+insert into Students (S_FName, S_LName, Username) values ('Jane', 'Doe', 'jd5001');
+#else, update name
+Update Students ()
+#add student to class
+insert into Enrolled (Class_ID, Student_ID) values ('1',(Select Student_ID From Students Where Username = 'jd5001'));
+
+#add-student username
+#username is null, return error
+(Select Student_ID From Students Where Username = 'jd5001');
+insert into Enrolled (Class_ID, Student_ID) values ('1',(Select Student_ID From Students Where Username = 'jd5001'));
+
+
+DELIMITER $$
+CREATE PROCEDURE add_student(in c_id INTEGER, username VARCHAR(50))
+BEGIN
+    DECLARE EXIT HANDLER FOR 1048
+    BEGIN
+ 	SELECT CONCAT('Student username: ',username,' does not exist') AS message;
+    END;
+insert into Enrolled (Class_ID, Student_ID) values (c_id, (Select Student_ID From Students Where Username = username));
+END $$
+DELIMITER ;
+
+call add_student('1','jd5001');
+
+
+
+
+
+
+#show-students
+
+#show-students string
+
+#grade assignment username grade
+
+#grade assignmentname username grade
+
+#student-grades username
+
+#gradebook
+
 
