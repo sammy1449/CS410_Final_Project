@@ -65,7 +65,7 @@ select * from Enrolled;
 select * from Gradebook;
 
 DELIMITER $$
-CREATE PROCEDURE New_Class(IN c_num VARCHAR(6), term VARCHAR(6), sec_num INTEGER, ds VARCHAR(100))
+CREATE PROCEDURE new_class(IN c_num VARCHAR(6), term VARCHAR(6), sec_num INTEGER, ds VARCHAR(100))
 BEGIN
 	INSERT INTO Class (Course_number, Term, Section_Number, C_Description) values (c_num, term, sec_num, ds);
 END $$

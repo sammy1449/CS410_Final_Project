@@ -29,7 +29,7 @@ class project {
 			Connection conn = null;
 			conn = DriverManager.getConnection(
 					"jdbc:mysql://localhost:" + port+ "/" + database +
-					"?verifyServerCertificate=false&useSSL=true", "msandbox",
+					"?verifyServerCertificate=false&useSSL=true&serverTimezone=UTC", "msandbox",
 					password);
 			// Do something with the Connection
 			System.out.println("Database " + database +" connection succeeded!");
@@ -634,7 +634,7 @@ class project {
 				}
 			}
 
-			Class.forName("com.mysql.jdbc.Driver");
+			Class.forName("com.mysql.cj.jdbc.Driver");
 			System.out.println();
 			System.out.println("JDBC driver loaded");
     Connection conn = makeConnection("57036", "Final","Nightwing0225");
