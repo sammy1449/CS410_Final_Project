@@ -25,7 +25,7 @@ CREATE TABLE Students (
 CREATE TABLE Assignments (
 	Assignment_ID INTEGER PRIMARY KEY AUTO_INCREMENT,
     Class_ID INTEGER NOT NULL REFERENCES Class,
-    A_Name VARCHAR(50) UNIQUE NOT NULL,
+    A_Name VARCHAR(50) NOT NULL,
     Category_ID INTEGER NOT NULL REFERENCES Category,
     A_Description TINYTEXT NOT NULL,
     Points INTEGER NOT NULL,
@@ -39,11 +39,12 @@ CREATE TABLE Assignments (
 CREATE TABLE Category(
 	Category_ID INTEGER PRIMARY KEY AUTO_INCREMENT,
     Class_ID INTEGER NOT NULL REFERENCES Class,
-    Category_Name VARCHAR(20) UNIQUE NOT NULL,
+    Category_Name VARCHAR(20) NOT NULL,
     Weight DOUBLE NOT NULL,
     FOREIGN KEY (Class_ID) REFERENCES Class (Class_ID),
 	INDEX (Class_ID)
 );
+
 
 CREATE TABLE Enrolled (
 	Enrolled_ID INTEGER PRIMARY KEY AUTO_INCREMENT,
@@ -130,7 +131,7 @@ SELECT * FROM Category WHERE Class_ID = c_id;
 END $$
 DELIMITER ;
 
-Call show_categories('1');
+Call show_categories('21');
 
 #add-category Name weight
 DELIMITER $$
@@ -140,7 +141,8 @@ INSERT INTO Category (Class_ID, Category_Name, Weight) values (c_id, cat_name, w
 END $$
 DELIMITER ;
 
-Call add_category('1', 'Homework','35.00');
+Call add_category('21', 'Project', '20');
+Call add_category('21', 'Homework','35.00');
 
 
 #show-assignment
@@ -154,7 +156,7 @@ GROUP BY A_Name, Points, Category_Name;
 END $$
 DELIMITER ;
 
-Call show_assignment('1');
+Call show_assignment('21');
 
 #add-assignment name Category Description points
 DELIMITER $$
@@ -167,47 +169,78 @@ where Category_Name = cat_name && Class_ID = c_id), a_des, points);
 END $$
 DELIMITER ;
 
-Call add_assignment('1', 'Assignment 1', 'Homework', 'ERModel Diagram', '100');
+Call add_assignment('21', 'Assignment 1', 'Homework', 'ERModel Diagram', '100');
+Call add_assignment('21', 'Final Project', 'Project', 'Partner project', '100');
 
-#add-student username studentid Last First
-#check if username exits
-Select Student_ID From Students Where Username = 'jd5001';
-#checks if f&l name exits
-Select Student_ID From Students Where Username = 'jd5001' && S_FName = 'Jane' && S_LName = 'Doe'; 
-#if not, then add them
-insert into Students (S_FName, S_LName, Username) values ('Jane', 'Doe', 'jd5001');
-#else, update name
-Update Students ()
-#add student to class
-insert into Enrolled (Class_ID, Student_ID) values ('1',(Select Student_ID From Students Where Username = 'jd5001'));
-
-#add-student username
-#username is null, return error
-(Select Student_ID From Students Where Username = 'jd5001');
-insert into Enrolled (Class_ID, Student_ID) values ('1',(Select Student_ID From Students Where Username = 'jd5001'));
-
-
+#------------------------------
+#add-student username studentid Last First !!NOT FINISHED!!
 DELIMITER $$
-CREATE PROCEDURE add_student(in c_id INTEGER, username VARCHAR(50))
+CREATE PROCEDURE add_student(in c_id INTEGER, uname VARCHAR(50), s_id INTEGER, lName VARCHAR(50), fName VARCHAR(50))
 BEGIN
-    DECLARE EXIT HANDLER FOR 1048
-    BEGIN
- 	SELECT CONCAT('Student username: ',username,' does not exist') AS message;
-    END;
-insert into Enrolled (Class_ID, Student_ID) values (c_id, (Select Student_ID From Students Where Username = username));
+	DECLARE EXIT HANDLER FOR 1048
+	BEGIN
+		SET @checkfirstname = (Select S_FName From Students Where Username = uname);
+        SET @checklaststname = (Select S_LName From Students Where Username = uname);
+        IF (@checkfirstname != fName) || (@checklastname != lName) THEN
+			UPDATE Students SET S_FNAME = fName, S_LName = lName WHERE Username = uname;
+		ELSE
+        	INSERT INTO Students (S_FName, S_LName, Username) values (lName, fName, uname);
+			INSERT INTO Enrolled (Class_ID, Student_ID) values (c_id, s_id);
+        END IF;
+	END;
+ INSERT INTO Enrolled (Class_ID, Student_ID) values (c_id,(Select Student_ID From Students Where Username = uname && S_FName = fName && S_LName = lname));
 END $$
 DELIMITER ;
 
-call add_student('1','jd5001');
+Select * From Students Where Username = 'jd5001';
 
+INSERT INTO Enrolled (Class_ID, Student_ID) values ('21',(Select Student_ID From Students Where Username = 'jd5001' && S_FName = 'John' && S_LName = 'Doe'));
 
+call add_student('21', 'jd5001', '101','John','Daxton');
 
+#--------------------------------
+#add-student username
+#username is null, return error
+Select Student_ID From Students Where Username = 'jd5001';
 
+DELIMITER $$
+CREATE PROCEDURE add_student2(in c_id INTEGER, uname VARCHAR(50))
+BEGIN
+	DECLARE EXIT HANDLER FOR 1048
+	BEGIN
+		SELECT 'Username was not found.';
+	END;
+    
+INSERT INTO Enrolled (Class_ID, Student_ID) values (c_id,(Select Student_ID From Students Where Username = uname));
 
+END $$
+DELIMITER ;
+
+call add_student2('21','jd5001');
 
 #show-students
+DELIMITER $$
+CREATE PROCEDURE show_students(in c_id INTEGER)
+BEGIN
+SELECT Students.Student_ID, S_FName, S_LName, Username
+FROM Students JOIN Enrolled ON (Students.Student_ID = Enrolled.Student_ID)
+WHERE Class_ID = c_id;
+END $$
+DELIMITER ;
+
+call show_students('21');
 
 #show-students string
+DELIMITER $$
+CREATE PROCEDURE show_students2(in c_id INTEGER, str VARCHAR(50))
+BEGIN
+Select S_FName, S_LName, Username 
+FROM Students JOIN Enrolled ON (Students.Student_ID = Enrolled.Student_ID)
+Where ((Locate(str, S_FName) > 0) || (Locate(str, S_LName)>0) || (Locate(str, Username)>0)) && Class_ID = c_id;
+END $$
+DELIMITER ;
+
+call show_students2('21', 'a');
 
 #grade assignment username grade
 
