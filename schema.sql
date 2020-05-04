@@ -269,14 +269,16 @@ SELECT Username, Grade, A_Name, Points, Category_Name
 FROM Students Right Join Gradebook on (Students.Student_ID = Gradebook.Student_ID)
 Right Join Assignments on (Assignments.Assignment_ID = Gradebook.Assignment_ID)
 JOIN Category ON (Assignments.Category_ID = Category.Category_ID)
-WHERE Category.Class_ID = '21';
+JOIN Class ON (Category.Class_ID = Class.Class_ID)
+WHERE C_Status = 'Active';
+
 #gradebook
 
 Select Students.Student_ID, Students.Username, Count(*) as Grade
 FROM Students Right Join Gradebook on (Students.Student_ID = Gradebook.Student_ID),
 Gradebook g1 JOIN Assignments on (Assignments.Assignment_ID = g1.Assignment_ID),
 Assignments a1 JOIN Class on (a1.Class_ID = Class.Class_ID)
-WHERE C_Status = 'active'
+WHERE C_Status = 'Active'
 GROUP BY Students.Student_ID;
 
 
