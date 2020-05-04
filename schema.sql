@@ -249,13 +249,13 @@ SET @a_id = (Select Assignment_ID from Assignments Where A_Name = aname && Class
 SET @s_id = (Select Student_ID from Students Where Username = uname LIMIT 1);
 SET @get_points = (Select Points from Assignments JOIN Class ON (Assignments.Class_ID = Class.Class_ID)
 									Where A_Name = a_name AND C_Status = 'Active' LIMIT 1);
-SET @grade_exits = (Select Grade_ID From Gradebook Where Student_ID = @s_id AND Assignment_ID = @a_id LIMIT 1);
+SET @grade_exists = (Select Grade_ID From Gradebook Where Student_ID = @s_id AND Assignment_ID = @a_id LIMIT 1);
 
 IF(grade > @get_points) THEN
 	Select CONCAT("Grade cannot be greater than ",@get_points, " points");
 END IF;
 
-IF (@grade_exits is not NULL) THEN
+IF (@grade_exists is not NULL) THEN
 	UPDATE Gradebook SET Grade = grade WHERE Student_ID = @s_id && Assignment_ID = @a_id;
 ELSE
 	INSERT INTO Gradebook (Student_ID, Assignment_ID, Grade) values (@s_id, @a_id, grade);
