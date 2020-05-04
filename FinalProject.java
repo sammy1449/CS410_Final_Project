@@ -67,7 +67,7 @@ class project {
 						+ ":" + rs.getString(2) 
 						+ ":" + rs.getString(3) 
 						+ ":" + rs.getInt(4)
-						+ ":" + rs.getString(5)
+						+ ":" + rs.getInt(5)
 						);
 			}
 		} catch (SQLException ex) {
@@ -155,6 +155,7 @@ class project {
 						+ ":" + rs.getString(3) 
 						+ ":" + rs.getInt(4)
 						+ ":" + rs.getString(5)
+						+ ":" + rs.getString(6)
 						);
 			}
 
@@ -205,6 +206,7 @@ class project {
 						+ ":" + rs.getString(3) 
 						+ ":" + rs.getInt(4)
 						+ ":" + rs.getString(5)
+						+ ":" + rs.getString(6)
 						);
 			}
 
@@ -258,6 +260,7 @@ class project {
 						+ ":" + rs.getString(3) 
 						+ ":" + rs.getInt(4)
 						+ ":" + rs.getString(5)
+						+ ":" + rs.getString(6)
 						);
 			}
 		} catch (SQLException ex) {
@@ -285,14 +288,14 @@ class project {
 		}
 	}
 	
-	public static void runGetShipments(Connection conn, String code) {
+	public static void runShowClass(Connection conn) {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 
 		try {
 				// be sure to call the appropriate procedure based on the function youre running
-			stmt = conn.prepareStatement("call GetShipments(?)");
-			stmt.setString(1, code); // input parameter
+			stmt = conn.prepareStatement("call show_class()");
+			
 			
       		boolean isResultSet = stmt.execute();    
       		if(isResultSet) {
@@ -304,9 +307,11 @@ class project {
 			while (rs.next()) {  
       			// output must match result set columns
 				System.out.println(rs.getInt(1) 
-						+ ":" + rs.getInt(2) 
-						+ ":" + rs.getInt(3)
-						+ ":" + rs.getDate(4)
+						+ ":" + rs.getString(2) 
+						+ ":" + rs.getString(3) 
+						+ ":" + rs.getInt(4)
+						+ ":" + rs.getString(5)
+						+ ":" + rs.getString(6)
 						);
 			}
 		} catch (SQLException ex) {
@@ -334,63 +339,13 @@ class project {
 		}
 	}
 	
-	public static void runGetPurchases(Connection conn, String code) {
+	public static void runShowCategories(Connection conn) {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 
 		try {
 				// be sure to call the appropriate procedure based on the function youre running
-			stmt = conn.prepareStatement("call GetPurchases(?)");
-			stmt.setString(1, code); // input parameter
-			
-      		boolean isResultSet = stmt.execute();    
-      		if(isResultSet) {
-          			rs = stmt.getResultSet();
-			}
-
-			// We have DATA!
-			rs.beforeFirst();  
-			while (rs.next()) {  
-      			// output must match result set columns
-				System.out.println(rs.getInt(1) 
-						+ ":" + rs.getInt(2) 
-						+ ":" + rs.getInt(3)
-						+ ":" + rs.getDate(4)
-						);
-			}
-		} catch (SQLException ex) {
-			// handle any errors
-			System.err.println("SQLException: " + ex.getMessage());
-			System.err.println("SQLState: " + ex.getSQLState());
-			System.err.println("VendorError: " + ex.getErrorCode());
-		} finally {
-			// it is a good idea to release resources in a finally{} block
-			// in reverse-order of their creation if they are no-longer needed
-			if (rs != null) {
-				try {
-					rs.close();
-				} catch (SQLException sqlEx) {
-				} // ignore
-				rs = null;
-			}
-			if (stmt != null) {
-				try {
-					stmt.close();
-				} catch (SQLException sqlEx) {
-				} // ignore
-				stmt = null;
-			}
-		}
-	}
-	
-	public static void runItemsAvailable(Connection conn, String code) {
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-
-		try {
-				// be sure to call the appropriate procedure based on the function youre running
-			stmt = conn.prepareStatement("call ItemsAvailable(?)");
-			stmt.setString(1, code); // input parameter
+			stmt = conn.prepareStatement("call show_categories()");
 			
       		boolean isResultSet = stmt.execute();    
       		if(isResultSet) {
@@ -402,10 +357,8 @@ class project {
 			while (rs.next()) {  
       			// output must match result set columns
 				System.out.println(rs.getString(1) 
-						+ ":" + rs.getString(2) 
+						+ ":" + rs.getInt(2) 
 						+ ":" + rs.getInt(3)
-						+ ":" + rs.getInt(4)
-						+ ":" + rs.getInt(4)
 						);
 			}
 		} catch (SQLException ex) {
@@ -433,15 +386,147 @@ class project {
 		}
 	}
 	
-	public static void runUpdateItem(Connection conn, String code, String price) {
+	public static void runAddCategory(Connection conn, String Category, String weight) {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 
 		try {
 				// be sure to call the appropriate procedure based on the function youre running
-			stmt = conn.prepareStatement("call UpdateItem(?, ?)");
-			stmt.setString(1, code);
-			stmt.setString(2, price);
+			stmt = conn.prepareStatement("call add_category(?, ?)");
+			stmt.setString(1, Category);
+			stmt.setString(2, weight);
+			
+      		boolean isResultSet = stmt.execute();    
+      		if(isResultSet) {
+          			rs = stmt.getResultSet();
+			}
+
+			
+		} catch (SQLException ex) {
+			// handle any errors
+			System.err.println("SQLException: " + ex.getMessage());
+			System.err.println("SQLState: " + ex.getSQLState());
+			System.err.println("VendorError: " + ex.getErrorCode());
+		} finally {
+			// it is a good idea to release resources in a finally{} block
+			// in reverse-order of their creation if they are no-longer needed
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException sqlEx) {
+				} // ignore
+				rs = null;
+			}
+			if (stmt != null) {
+				try {
+					stmt.close();
+				} catch (SQLException sqlEx) {
+				} // ignore
+				stmt = null;
+			}
+		}
+	}
+	
+	public static void runShowAssignment(Connection conn) {
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+
+		try {
+				// be sure to call the appropriate procedure based on the function youre running
+			stmt = conn.prepareStatement("call show_assignment()");
+			
+      		boolean isResultSet = stmt.execute();    
+      		if(isResultSet) {
+          			rs = stmt.getResultSet();
+			}
+
+			rs.beforeFirst();  
+			while (rs.next()) {  
+      			// output must match result set columns
+				System.out.println(rs.getString(1) 
+						+ ":" + rs.getInt(2) 
+						+ ":" + rs.getString(3)
+						);
+			}
+
+		} catch (SQLException ex) {
+			// handle any errors
+			System.err.println("SQLException: " + ex.getMessage());
+			System.err.println("SQLState: " + ex.getSQLState());
+			System.err.println("VendorError: " + ex.getErrorCode());
+		} finally {
+			// it is a good idea to release resources in a finally{} block
+			// in reverse-order of their creation if they are no-longer needed
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException sqlEx) {
+				} // ignore
+				rs = null;
+			}
+			if (stmt != null) {
+				try {
+					stmt.close();
+				} catch (SQLException sqlEx) {
+				} // ignore
+				stmt = null;
+			}
+		}
+	}
+	
+	public static void runAddAssignment(Connection conn, String assignment, String cat_name, String a_des, String points) {
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+
+		try {
+				// be sure to call the appropriate procedure based on the function youre running
+			stmt = conn.prepareStatement("call add_assignment(?, ?, ?, ?)");
+			stmt.setString(1, assignment);
+			stmt.setString(2, cat_name);
+			stmt.setString(3, a_des);
+			stmt.setString(4, points);
+			
+      		boolean isResultSet = stmt.execute();    
+      		if(isResultSet) {
+          			rs = stmt.getResultSet();
+			}
+
+		} catch (SQLException ex) {
+			// handle any errors
+			System.err.println("SQLException: " + ex.getMessage());
+			System.err.println("SQLState: " + ex.getSQLState());
+			System.err.println("VendorError: " + ex.getErrorCode());
+		} finally {
+			// it is a good idea to release resources in a finally{} block
+			// in reverse-order of their creation if they are no-longer needed
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException sqlEx) {
+				} // ignore
+				rs = null;
+			}
+			if (stmt != null) {
+				try {
+					stmt.close();
+				} catch (SQLException sqlEx) {
+				} // ignore
+				stmt = null;
+			}
+		}
+	}
+	
+	public static void runAddStudent(Connection conn, String uname, String s_id, String LName, String FName) {
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+
+		try {
+				// be sure to call the appropriate procedure based on the function youre running
+			stmt = conn.prepareStatement("call add_student(?, ?, ?, ?)");
+			stmt.setString(1, uname); 
+			stmt.setString(2, s_id);
+			stmt.setString(3, LName);
+			stmt.setString(4, FName);
 			
       		boolean isResultSet = stmt.execute();    
       		if(isResultSet) {
@@ -472,53 +557,14 @@ class project {
 		}
 	}
 	
-	public static void runDeleteItem(Connection conn, String code) {
+	public static void runAddStudent2(Connection conn, String uname) {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 
 		try {
 				// be sure to call the appropriate procedure based on the function youre running
-			stmt = conn.prepareStatement("call DeleteItem(?)");
-			stmt.setString(1, code); // input parameter
-			
-      		boolean isResultSet = stmt.execute();    
-      		if(isResultSet) {
-          			rs = stmt.getResultSet();
-			}
-
-		} catch (SQLException ex) {
-			// handle any errors
-			System.err.println("SQLException: " + ex.getMessage());
-			System.err.println("SQLState: " + ex.getSQLState());
-			System.err.println("VendorError: " + ex.getErrorCode());
-		} finally {
-			// it is a good idea to release resources in a finally{} block
-			// in reverse-order of their creation if they are no-longer needed
-			if (rs != null) {
-				try {
-					rs.close();
-				} catch (SQLException sqlEx) {
-				} // ignore
-				rs = null;
-			}
-			if (stmt != null) {
-				try {
-					stmt.close();
-				} catch (SQLException sqlEx) {
-				} // ignore
-				stmt = null;
-			}
-		}
-	}
-	
-	public static void runDeleteShipment(Connection conn, String code) {
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-
-		try {
-				// be sure to call the appropriate procedure based on the function youre running
-			stmt = conn.prepareStatement("call DeleteShipment(?)");
-			stmt.setString(1, code); // input parameter
+			stmt = conn.prepareStatement("call add_student2(?)");
+			stmt.setString(1, uname); // input parameter
 			
       		boolean isResultSet = stmt.execute();    
       		if(isResultSet) {
@@ -549,19 +595,30 @@ class project {
 		}
 	}
 	
-	public static void runDeletePurchase(Connection conn, String code) {
+	public static void runShowStudents(Connection conn) {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 
 		try {
 				// be sure to call the appropriate procedure based on the function youre running
-			stmt = conn.prepareStatement("call DeletePurchase(?)");
-			stmt.setString(1, code); // input parameter
+			stmt = conn.prepareStatement("call show_students()");
 			
       		boolean isResultSet = stmt.execute();    
       		if(isResultSet) {
           			rs = stmt.getResultSet();
 			}
+
+			rs.beforeFirst();  
+			while (rs.next()) {  
+      			// output must match result set columns
+				System.out.println(rs.getInt(1) 
+						+ ":" + rs.getString(2) 
+						+ ":" + rs.getString(3)
+						+ ":" + rs.getString(4)
+						+ ":" + rs.getInt(5)
+						);
+			}
+
 		} catch (SQLException ex) {
 			// handle any errors
 			System.err.println("SQLException: " + ex.getMessage());
@@ -586,7 +643,104 @@ class project {
 			}
 		}
 	}
-	
+
+	public static void runShowStudents2(Connection conn, String str) {
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+
+		try {
+				// be sure to call the appropriate procedure based on the function youre running
+			stmt = conn.prepareStatement("call show_students2(?)");
+			stmt.setString(1, str);
+			
+      		boolean isResultSet = stmt.execute();    
+      		if(isResultSet) {
+          			rs = stmt.getResultSet();
+			}
+
+			rs.beforeFirst();  
+			while (rs.next()) {  
+      			// output must match result set columns
+				System.out.println(rs.getString(1) 
+						+ ":" + rs.getString(2) 
+						+ ":" + rs.getString(3)
+						);
+			}
+
+		} catch (SQLException ex) {
+			// handle any errors
+			System.err.println("SQLException: " + ex.getMessage());
+			System.err.println("SQLState: " + ex.getSQLState());
+			System.err.println("VendorError: " + ex.getErrorCode());
+		} finally {
+			// it is a good idea to release resources in a finally{} block
+			// in reverse-order of their creation if they are no-longer needed
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException sqlEx) {
+				} // ignore
+				rs = null;
+			}
+			if (stmt != null) {
+				try {
+					stmt.close();
+				} catch (SQLException sqlEx) {
+				} // ignore
+				stmt = null;
+			}
+		}
+	}
+
+	public static void runGrade(Connection conn, String assignment_name, String uName, String grade) {
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+
+		try {
+				// be sure to call the appropriate procedure based on the function youre running
+			stmt = conn.prepareStatement("call grade(?, ?, ?)");
+			stmt.setString(1, assignment_name);
+			stmt.setString(2, uName);
+			stmt.setString(3, grade);
+			
+      		boolean isResultSet = stmt.execute();    
+      		if(isResultSet) {
+          			rs = stmt.getResultSet();
+			}
+
+			rs.beforeFirst();  
+			while (rs.next()) {  
+      			// output must match result set columns
+				System.out.println(rs.getString(1) 
+						+ ":" + rs.getInt(2) 
+						+ ":" + rs.getString(3)
+						);
+			}
+
+		} catch (SQLException ex) {
+			// handle any errors
+			System.err.println("SQLException: " + ex.getMessage());
+			System.err.println("SQLState: " + ex.getSQLState());
+			System.err.println("VendorError: " + ex.getErrorCode());
+		} finally {
+			// it is a good idea to release resources in a finally{} block
+			// in reverse-order of their creation if they are no-longer needed
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException sqlEx) {
+				} // ignore
+				rs = null;
+			}
+			if (stmt != null) {
+				try {
+					stmt.close();
+				} catch (SQLException sqlEx) {
+				} // ignore
+				stmt = null;
+			}
+		}
+	}
 
 	public static void main(String[] args) {
 		try {
@@ -594,17 +748,21 @@ class project {
 			
 			
 			if (args[0].equals("/?") ){
-			  System.out.println ("Usage :   CreateItem <ItemCode> <ItemDescription> <Price>");
-			  System.out.println ("Usage :   CreatePurchase <ItemCode> <PurchaseQuantity>");
-			  System.out.println ("Usage :   CreateShipment <ItemCode> <ShipmentQuantity> ShipmentDate");
-			  System.out.println ("Usage :   GetItems <ItemCode>");
-			  System.out.println ("Usage :   GetShipments <ItemCode>");
-			  System.out.println ("Usage :   GetPurchases <ItemCode>");
-			  System.out.println ("Usage :   ItemsAvailable <ItemCode>");
-			  System.out.println ("Usage :   UpdateItem <ItemCode> <NewPrice>");
-			  System.out.println ("Usage :   DeleteItem <ItemCode>");
-			  System.out.println ("Usage :   DeleteShipment <ItemCode>");
-			  System.out.println ("Usage :   DeletePurchase <ItemCode>");
+			  System.out.println ("Usage :   new-class <CourseNumber> <Term> <Section> <Description>");
+			  System.out.println ("Usage :   list-classes");
+			  System.out.println ("Usage :   select-class <CourseNumber>");
+			  System.out.println ("Usage :   select-class2 <CourseNumber> <Term>");
+			  System.out.println ("Usage :   select-class3 <CourseNumber> <Term> <Section>");
+			  System.out.println ("Usage :   show-class");
+			  System.out.println ("Usage :   show-categories");
+			  System.out.println ("Usage :   add-category <CatName> <Weight>");
+			  System.out.println ("Usage :   show-assignment");
+			  System.out.println ("Usage :   add-assignment <AName> <Category> <Description> <Points>");
+			  System.out.println ("Usage :   add-student <Username> <sID> <LastN> <FirstN>");
+			  System.out.println ("Usage :   add-student2 <Username>");
+			  System.out.println ("Usage :   show-students");
+			  System.out.println ("Usage :   show-students2 <String>");
+			  System.out.println ("Usage :   grade <AName> <Username> <Grade>");
 			  return;
 			}
 			else {
@@ -628,50 +786,66 @@ class project {
 
 			if (args.length >= 1 && args.length <= 6)
 			{
-			 	if(args[0].equals("ListClasses")) {
-			 		System.out.println("Running ListClasses");
+			 	if(args[0].equals("list-classes")) {
+			 		System.out.println("Running list-classes");
 			 		runlistclasses(conn);
 			 	}
-			 	else if(args[0].equals("CreateClass")) {
-			 		System.out.println("Running CreateClass");
+			 	else if(args[0].equals("new-class")) {
+			 		System.out.println("Running new-class");
 			 		runCreateClass(conn, args[1], args[2], args[3], args[4]);
 			 	}
-			 	else if(args[0].equals("SelectClass")) {
-			 		System.out.println("Running SelectClass");
+			 	else if(args[0].equals("select-class")) {
+			 		System.out.println("Running select-class");
 			 		runSelectClass(conn, args[1]);
 			 	}
-			 	else if(args[0].equals("SelectClass2")) {
-			 		System.out.println("Running SelectClass2");
+			 	else if(args[0].equals("select-class2")) {
+			 		System.out.println("Running select-class2");
 			 		runSelectClass2(conn, args[1], args[2]);
 			 	}
-			 	else if(args[0].equals("SelectClass3")) {
-			 		System.out.println("Running SelectClass3");
+			 	else if(args[0].equals("select-class3")) {
+			 		System.out.println("Running select-class3");
 			 		runSelectClass3(conn, args[1], args[2], args[3]);
 			 	}
-			 	else if(args[0].equals("GetPurchases")) {
-			 		System.out.println("Running GetPurchases");
-			 		runGetPurchases(conn, args[1]);
+			 	else if(args[0].equals("show-class")) {
+			 		System.out.println("Running show-class");
+			 		runShowClass(conn);
 			 	}
-			 	else if(args[0].equals("ItemsAvailable")) {
-			 		System.out.println("Running ItemsAvailable");
-			 		runItemsAvailable(conn, args[1]);
+			 	else if(args[0].equals("show-categories")) {
+			 		System.out.println("Running show-categories");
+			 		runShowCategories(conn);
 			 	}
-			 	else if(args[0].equals("UpdateItem")) {
-			 		System.out.println("Running UpdateItem");
-			 		runUpdateItem(conn, args[1], args[2]);
+			 	else if(args[0].equals("add-category")) {
+			 		System.out.println("Running add-category");
+			 		runAddCategory(conn, args[1], args[2]);
 			 	}
-			 	else if(args[0].equals("DeleteItem")) {
-			 		System.out.println("Running DeleteItem");
-			 		runDeleteItem(conn, args[1]);
+			 	else if(args[0].equals("show-assignments")) {
+			 		System.out.println("Running show-assignments");
+			 		runShowAssignment(conn);
 			 	}
-			 	else if(args[0].equals("DeleteShipment")) {
-			 		System.out.println("Running DeleteShipment");
-			 		runDeleteShipment(conn, args[1]);
+			 	else if(args[0].equals("add-assignments")) {
+			 		System.out.println("Running add-assignments");
+			 		runAddAssignment(conn, args[1], args[2], args[3], args[4]);
 			 	}
-			 	else if(args[0].equals("DeletePurchase")) {
-			 		System.out.println("Running DeletePurchase");
-			 		runDeletePurchase(conn, args[1]);
+			 	else if(args[0].equals("add-student")) {
+			 		System.out.println("Running add-student");
+			 		runAddStudent(conn, args[1], args[2], args[3], args[4]);
 			 	}
+				else if(args[0].equals("add-student2")){
+					System.out.println("Running add-student2")
+					runAddStudent2(conn, args[1])
+				}
+				else if(args[0].equals("show-students")){
+					System.out.println("Running show-students")
+					runShowStudents(conn)
+				}
+				else if(args[0].equals("show-students2")){
+					System.out.println("Running show-students2")
+					runShowStudents2(conn, args[1])
+				}
+				else if(args[0].equals("grade")){
+					System.out.println("Running grade")
+					runGrade(conn, args[1], args[2], args[3])
+				}
 			}
 			else if (args[0].equals("/?") ){
 			 	System.out.println("Running test");
