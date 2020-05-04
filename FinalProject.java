@@ -95,15 +95,16 @@ class project {
 		}
 	}
 	
-	public static void runCreateItem(Connection conn, String code, String description, String price) {
+	public static void runCreateClass(final Connection conn, final String course, final String semester, final String section, final String description) {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 
 		try {
-			stmt = conn.prepareStatement("call CreateItem(?, ?, ?)");
-			stmt.setString(1, code);
-			stmt.setString(2, description);
-			stmt.setString(3, price);
+			stmt = conn.prepareStatement("call new_class(?, ?, ?, ?)");
+			stmt.setString(1, course);
+			stmt.setString(2, semester);
+			stmt.setString(3, section);
+			stmt.setString(4, description);
 			
       		boolean isResultSet = stmt.execute();    
       		if(isResultSet) {
@@ -133,19 +134,30 @@ class project {
 		}
 	}
 	
-	public static void runCreatePurchase(Connection conn, String code, String purchaseQuantity) {
+	public static void runSelectClass(Connection conn, String course) {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 
 		try {
-			stmt = conn.prepareStatement("call CreatePurchase(?, ?)");
-			stmt.setString(1, code);
-			stmt.setString(2, purchaseQuantity);
+			stmt = conn.prepareStatement("call select_class(?)");
+			stmt.setString(1, course);
 			
       		boolean isResultSet = stmt.execute();    
       		if(isResultSet) {
           			rs = stmt.getResultSet();
 			}
+
+			rs.beforeFirst();  
+			while (rs.next()) {  
+      			// output must match result set columns
+				System.out.println(rs.getInt(1) 
+						+ ":" + rs.getString(2) 
+						+ ":" + rs.getString(3) 
+						+ ":" + rs.getInt(4)
+						+ ":" + rs.getString(5)
+						);
+			}
+
 		} catch (SQLException ex) {
 			// handle any errors
 			System.err.println("SQLException: " + ex.getMessage());
@@ -171,19 +183,29 @@ class project {
 		}
 	}
 
-	public static void runCreateShipment(Connection conn, String code, String shipmentQuantity, String date) {
+	public static void runSelectClass2(Connection conn, String course, String term) {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 
 		try {
-			stmt = conn.prepareStatement("call CreateShipment(?, ?, ?)");
-			stmt.setString(1, code);
-			stmt.setString(2, shipmentQuantity);
-			stmt.setString(3, date);
+			stmt = conn.prepareStatement("call select_class2(?, ?)");
+			stmt.setString(1, course);
+			stmt.setString(2, term);
 			
       		boolean isResultSet = stmt.execute();    
       		if(isResultSet) {
           			rs = stmt.getResultSet();
+			}
+
+			rs.beforeFirst();  
+			while (rs.next()) {  
+      			// output must match result set columns
+				System.out.println(rs.getInt(1) 
+						+ ":" + rs.getString(2) 
+						+ ":" + rs.getString(3) 
+						+ ":" + rs.getInt(4)
+						+ ":" + rs.getString(5)
+						);
 			}
 
 		} catch (SQLException ex) {
@@ -211,15 +233,17 @@ class project {
 		}
 	}
 	
-	public static void runGetItems(Connection conn, String code) {
+	public static void runSelectClass3(Connection conn, String course, String term, String number) {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 
 		try {
 				// be sure to call the appropriate procedure based on the function youre running
-			stmt = conn.prepareStatement("call GetItems(?)");
-			stmt.setString(1, code); // input parameter
-			
+			stmt = conn.prepareStatement("call select_class3(?, ?, ?)");
+			stmt.setString(1, course); // input parameter
+			stmt.setString(2, term);
+			stmt.setString(3, number);
+
       		boolean isResultSet = stmt.execute();    
       		if(isResultSet) {
           			rs = stmt.getResultSet();
@@ -232,7 +256,8 @@ class project {
 				System.out.println(rs.getInt(1) 
 						+ ":" + rs.getString(2) 
 						+ ":" + rs.getString(3) 
-						+ ":" + rs.getDouble(4)
+						+ ":" + rs.getInt(4)
+						+ ":" + rs.getString(5)
 						);
 			}
 		} catch (SQLException ex) {
@@ -562,48 +587,6 @@ class project {
 		}
 	}
 	
-	public static void runQuery(Connection conn) {
-
-		Statement stmt = null;
-		ResultSet rs = null;
-
-		try {
-			stmt = conn.createStatement();
-			rs = stmt.executeQuery("SELECT * FROM Student;");
-			// Now do something with the ResultSet ....
-			
-			rs.beforeFirst();
-			while (rs.next()) {
-				System.out.println(rs.getInt(1) 
-						+ ":" + rs.getString(2) 
-						+ ":" + rs.getString(3) 
-						+ ":" + rs.getString(4));
-			}
-
-		} catch (SQLException ex) {
-			// handle any errors
-			System.err.println("SQLException: " + ex.getMessage());
-			System.err.println("SQLState: " + ex.getSQLState());
-			System.err.println("VendorError: " + ex.getErrorCode());
-		} finally {
-			// it is a good idea to release resources in a finally{} block
-			// in reverse-order of their creation if they are no-longer needed
-			if (rs != null) {
-				try {
-					rs.close();
-				} catch (SQLException sqlEx) {
-				} // ignore
-				rs = null;
-			}
-			if (stmt != null) {
-				try {
-					stmt.close();
-				} catch (SQLException sqlEx) {
-				} // ignore
-				stmt = null;
-			}
-		}
-	}
 
 	public static void main(String[] args) {
 		try {
@@ -643,27 +626,27 @@ class project {
 // when the getdata request is made 
 // at the command line
 
-			if (args.length >= 1 && args.length <= 4)
+			if (args.length >= 1 && args.length <= 6)
 			{
 			 	if(args[0].equals("ListClasses")) {
 			 		System.out.println("Running ListClasses");
 			 		runlistclasses(conn);
 			 	}
-			 	else if(args[0].equals("CreatePurchase")) {
-			 		System.out.println("Running CreatePurchase");
-			 		runCreatePurchase(conn, args[1], args[2]);
+			 	else if(args[0].equals("CreateClass")) {
+			 		System.out.println("Running CreateClass");
+			 		runCreateClass(conn, args[1], args[2], args[3], args[4]);
 			 	}
-			 	else if(args[0].equals("CreateShipment")) {
-			 		System.out.println("Running CreateShipment");
-			 		runCreateShipment(conn, args[1], args[2], args[3]);
+			 	else if(args[0].equals("SelectClass")) {
+			 		System.out.println("Running SelectClass");
+			 		runSelectClass(conn, args[1]);
 			 	}
-			 	else if(args[0].equals("GetItems")) {
-			 		System.out.println("Running GetItems");
-			 		runGetItems(conn, args[1]);
+			 	else if(args[0].equals("SelectClass2")) {
+			 		System.out.println("Running SelectClass2");
+			 		runSelectClass2(conn, args[1], args[2]);
 			 	}
-			 	else if(args[0].equals("GetShipments")) {
-			 		System.out.println("Running GetShipments");
-			 		runGetShipments(conn, args[1]);
+			 	else if(args[0].equals("SelectClass3")) {
+			 		System.out.println("Running SelectClass3");
+			 		runSelectClass3(conn, args[1], args[2], args[3]);
 			 	}
 			 	else if(args[0].equals("GetPurchases")) {
 			 		System.out.println("Running GetPurchases");
@@ -693,10 +676,6 @@ class project {
 			else if (args[0].equals("/?") ){
 			 	System.out.println("Running test");
 				
-			}
-			else if (args[0].equals( "test") ){
-			 	System.out.println("Running test");
-				runQuery(conn);
 			}
 			else {
 				System.out.println("No process requested");
