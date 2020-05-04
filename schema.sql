@@ -8,6 +8,7 @@ Drop Table Assignments;
 Drop Table Category;
 Drop Table Enrolled;
 Drop table Gradebook;
+Drop table Category;
 
 
 CREATE TABLE Class (
@@ -96,12 +97,20 @@ DELIMITER ;
 DELIMITER $$
 CREATE PROCEDURE select_class(in c_num VARCHAR(6))
 BEGIN
-UPDATE Class SET C_Status = 'Active' Where Course_Number = c_num;
-SELECT * FROM Class WHERE Course_Number = c_num;
+SET @activeclass = (Select Course_Number from Class Where C_Status = 'Active');
+IF (@activeclass != c_num) THEN
+	UPDATE Class SET C_Status = 'Inactive' Where Course_Number = @activeclass;
+	UPDATE Class SET C_Status = 'Active' Where Course_Number = c_num;
+ELSE
+	UPDATE Class SET C_Status = 'Active' Where Course_Number = c_num;
+END IF;
 END $$
 DELIMITER ;
 
-call select_class('CS421');
+Select Course_Number from Class Where C_Status = 'Active';
+
+call select_class('AAB518');
+Select * from Class;
 
 DELIMITER $$
 CREATE PROCEDURE select_class2(in c_num VARCHAR(6), term VARCHAR(6))
