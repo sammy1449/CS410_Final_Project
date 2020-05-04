@@ -168,6 +168,7 @@ Insert into Assignments(Class_ID, A_Name, Category_ID, A_Description, Points) va
 (select Category_ID 
 from Category 
 where Category_Name = cat_name && Class_ID = c_id), a_des, points);
+Update 
 END $$
 DELIMITER ;
 
@@ -241,20 +242,22 @@ DELIMITER ;
 
 #student-grades username
 
-SELECT Username, Grade, A_Name, Points, Category_Name
+SELECT Username, Grade, Points, Category_Name
 FROM Students Right Join Gradebook on (Students.Student_ID = Gradebook.Student_ID)
 Right Join Assignments on (Assignments.Assignment_ID = Gradebook.Assignment_ID)
 JOIN Category ON (Assignments.Category_ID = Category.Category_ID)
-WHERE Category.Class_ID = '21';
+WHERE Category.Class_ID = '22'
+GROUP BY Username, Grade, Points, Category_Name;
 #gradebook
 
 
 
-call show_students('21');
-call show_assignment('21');
-call show_categories('21');
+call show_students('22');
+call show_assignment('22');
+call show_categories('22');
 select * 
 from Enrolled;
 select * from Gradebook;
+select * from Class;
 
 
