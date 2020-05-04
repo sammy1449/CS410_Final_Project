@@ -107,6 +107,14 @@ END IF;
 END $$
 DELIMITER ;
 
+DELIMITER $$
+CREATE PROCEDURE show_class()
+BEGIN
+Select Course_Number from Class Where C_Status = 'Active';
+END $$
+DELIMITER ;
+
+call show_class();
 Select Course_Number from Class Where C_Status = 'Active';
 
 call select_class('AAB518');
