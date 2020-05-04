@@ -183,19 +183,20 @@ END $$
 DELIMITER ;
 
 DELIMITER $$
-CREATE PROCEDURE grade(in c_id INTEGER, a_name VARCHAR(50), uname VARCHAR(50), grade INTEGER)
+CREATE PROCEDURE grade(in c_id INTEGER, aname VARCHAR(50), uname VARCHAR(50), grade INTEGER)
 BEGIN
-SET @a_id = (Select Assignment_ID from Assignments Where A_Name = a_name && Class_ID = c_id LIMIT 1);
+#get assignment id
+SET @a_id = (Select Assignment_ID from Assignments Where A_Name = aname && Class_ID = c_id LIMIT 1);
 SET @s_id = (Select Student_ID from Students Where Username = uname LIMIT 1);
 SET @get_points = (Select Points from Assignments Where A_Name = a_name && Class_ID = c_id LIMIT 1);
-SET @emptytablecheck = (Select Grade_ID From Gradebook LIMIT 1);
-SET @grade_exits = (Select Grade_ID From Gradebook Where Student_ID = @s_id && Assignment_ID = @a_id);
+SET @grade_exits = (Select Grade_ID From Gradebook Where Student_ID = @s_id && Assignment_ID = @a_id LIMIT 1);
+
 IF(grade > @get_points) THEN
 	Select CONCAT("Grade cannot be greater than ",@get_points, " points");
-ELSEIF (@emptytablecheck is NULL || @emptytablecheck='') THEN
-	INSERT INTO Gradebook (Student_ID, Assignment_ID, Grade) values (@s_id, @a_id, grade);
-ELSEIF (@grade_exits) THEN
-	UPDATE Gradebook SET Grade = grade WHERE Student_ID = @s_id;
+END IF;
+
+IF (@grade_exits is not NULL) THEN
+	UPDATE Gradebook SET Grade = grade WHERE Student_ID = @s_id && Assignment_ID = @a_id;
 ELSE
 	INSERT INTO Gradebook (Student_ID, Assignment_ID, Grade) values (@s_id, @a_id, grade);
 END IF;
@@ -204,17 +205,20 @@ DELIMITER ;
 
 #student-grades username
 
-
-
+SELECT Username, Grade, A_Name, Points, Category_Name
+FROM Students Right Join Gradebook on (Students.Student_ID = Gradebook.Student_ID)
+Right Join Assignments on (Assignments.Assignment_ID = Gradebook.Assignment_ID)
+JOIN Category ON (Assignments.Category_ID = Category.Category_ID)
+WHERE Category.Class_ID = '21';
 #gradebook
 
 
-call show_students('21');
 
-select * from Category;
-select * from Assignments;
-Select * From Class;
-Select * from Students;
-select * from Enrolled;
+call show_students('21');
+call show_assignment('21');
+call show_categories('21');
+select * 
+from Enrolled;
 select * from Gradebook;
+
 
