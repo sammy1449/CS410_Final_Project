@@ -115,16 +115,29 @@ Select * from Class;
 DELIMITER $$
 CREATE PROCEDURE select_class2(in c_num VARCHAR(6), term VARCHAR(6))
 BEGIN
-UPDATE Class SET C_Status = 'Active' Where Course_Number = c_num && Term = term;
-SELECT * FROM Class WHERE Course_Number = c_num AND Term = term;
+SET @activeclass = (Select Course_Number from Class Where C_Status = 'Active');
+IF (@activeclass != c_num AND @activeclass != term) THEN
+	UPDATE Class SET C_Status = 'Inactive' Where Course_Number = @activeclass;
+	UPDATE Class SET C_Status = 'Active' Where Course_Number = c_num AND Term = term;
+ELSE
+	UPDATE Class SET C_Status = 'Active' Where Course_Number = c_num AND Term = term;
+END IF;
 END $$
 DELIMITER ;
+
+call select_class2('CS421', 'Sp19');
+
 
 DELIMITER $$
 CREATE PROCEDURE select_class3(in c_num VARCHAR(6), term VARCHAR(6), sec_num INTEGER)
 BEGIN
-UPDATE Class SET C_Status = 'Active' Where Course_Number = c_Number;
-SELECT * FROM Class WHERE Course_Number = c_num AND Term = term AND Section_Number = sec_num;
+SET @activeclass = (Select Course_Number, Term, Section_Number from Class Where C_Status = 'Active');
+IF (@activeclass != c_num AND @activeclass != term AND @activeclass != sec_num) THEN
+	UPDATE Class SET C_Status = 'Inactive' Where Course_Number = @activeclass;
+	UPDATE Class SET C_Status = 'Active' Where Course_Number = c_num AND Term = term AND Section_Number = sec_num;
+ELSE
+	UPDATE Class SET C_Status = 'Active' Where Course_Number = c_num AND Term = term AND Section_Number = sec_num;
+END IF;
 END $$
 DELIMITER ;
 
