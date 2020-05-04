@@ -32,9 +32,15 @@ call Final.add_assignment('Assignment 4', 'Homework', 'Difficult Queries', 80);
 call Final.add_assignment('Midterm 1', 'Midterm 1', 'First midterm', 100);
 call Final.add_assignment('Midterm 2', 'Midterm 2', 'Second midterm', 100);
 call Final.add_student('aubreybohn', 101, 'Spannagel', 'Aubrey');
-call Final.grade('Assignment 1', 'aubreybohn', 98);
+call Final.add_student('samanthamaxey299', 102, 'Maxey', 'Samantha');
 call Final.grade('Assignment 2', 'aubreybohn', 77);
 call Final.grade('Assignment 3', 'aubreybohn', 100);
 call Final.grade('Assignment 4', 'aubreybohn', 75);
 call Final.grade('Midterm 1', 'aubreybohn', 88);
 call Final.grade('Midterm 2', 'aubreybohn', 79);
+call Final.grade('Assignment 2', 'samanthamaxey299', 80);
+call Final.grade('Assignment 3', 'samanthamaxey299', 90);
+call Final.grade('Assignment 4', 'samanthamaxey299', 80);
+call Final.grade('Midterm 1', 'samanthamaxey299', 88);
+call Final.grade('Midterm 2', 'samanthamaxey299', 93);
+

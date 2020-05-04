@@ -8,7 +8,7 @@ Drop Table Assignments;
 Drop Table Category;
 Drop Table Enrolled;
 Drop table Gradebook;
-Drop table Category;
+
 
 
 CREATE TABLE Class (
@@ -184,20 +184,20 @@ CREATE PROCEDURE add_assignment(in a_name VARCHAR(50), cat_name VARCHAR(20), a_d
 BEGIN
 Insert into Assignments(Class_ID, A_Name, Category_ID, A_Description, Points) values ((select Class_ID from Class where C_Status = 'Active'), a_name, 
 (select Category_ID 
-from Category 
-where Category_Name = cat_name AND Class_ID = c_id), a_des, points);
+from Category JOIN Class ON (Category.Class_ID = Class.Class_ID)
+where Category_Name = cat_name AND C_Status = 'Active' ), a_des, points);
 END $$
 DELIMITER ;
 
 DELIMITER $$
 CREATE PROCEDURE add_student(in uname VARCHAR(50), s_id INTEGER, lName VARCHAR(50), fName VARCHAR(50))
 BEGIN
-	SET @checkgivenname = (Select Student_ID from Students WHERE Username = uname && S_LName = lName && S_FName = fName);
+	SET @checkgivenname = (Select Student_ID from Students WHERE Username = uname AND S_LName = lName AND S_FName = fName);
     SET @usernameexits = (Select Username from Students WHERE Username = uname);
 
     IF (@usernameexits is not null && (@checkgivenname is NULL || @checkgivenname='')) THEN
 		Update Students SET S_FName = fName, S_LName = lName Where Student_ID = s_id;
-	ELSEIF ((@usernameexits is NULL || @usernameexits='') && (@checkgivenname is NULL || @checkgivenname='')) THEN
+	ELSEIF ((@usernameexits is NULL || @usernameexits='') AND (@checkgivenname is NULL || @checkgivenname='')) THEN
 		INSERT INTO Students (S_FName, S_LName, Username) values(fName, lName, uname);
     END IF;
     INSERT INTO Enrolled (Class_ID, Student_ID) values ((select Class_ID from Class where C_Status = 'Active'), s_id);
@@ -237,7 +237,7 @@ BEGIN
 Select S_FName, S_LName, Username 
 FROM Students JOIN Enrolled ON (Students.Student_ID = Enrolled.Student_ID),
 Enrolled e2 JOIN Class ON (e2.Class_ID = Class.Class_ID)
-Where ((Locate(str, S_FName) > 0) || (Locate(str, S_LName)>0) || (Locate(str, Username)>0)) AND C_Status = 'Active';
+Where ((Locate(str, S_FName) > 0) OR (Locate(str, S_LName)>0) OR (Locate(str, Username)>0)) AND C_Status = 'Active';
 END $$
 DELIMITER ;
 
@@ -245,18 +245,18 @@ DELIMITER $$
 CREATE PROCEDURE grade(in aname VARCHAR(50), uname VARCHAR(50), grade INTEGER)
 BEGIN
 #get assignment id
-SET @a_id = (Select Assignment_ID from Assignments Where A_Name = aname && Class_ID = c_id LIMIT 1);
+SET @a_id = (Select Assignment_ID from Assignments JOIN Class ON (Assignments.Class_ID = Class.Class_ID)Where A_Name = aname AND C_Status= 'Active' LIMIT 1);
 SET @s_id = (Select Student_ID from Students Where Username = uname LIMIT 1);
 SET @get_points = (Select Points from Assignments JOIN Class ON (Assignments.Class_ID = Class.Class_ID)
 									Where A_Name = a_name AND C_Status = 'Active' LIMIT 1);
 SET @grade_exists = (Select Grade_ID From Gradebook Where Student_ID = @s_id AND Assignment_ID = @a_id LIMIT 1);
 
-IF(grade > @get_points) THEN
+IF(grade >= @get_points) THEN
 	Select CONCAT("Grade cannot be greater than ",@get_points, " points");
 END IF;
 
 IF (@grade_exists is not NULL) THEN
-	UPDATE Gradebook SET Grade = grade WHERE Student_ID = @s_id && Assignment_ID = @a_id;
+	UPDATE Gradebook SET Grade = grade WHERE Student_ID = @s_id AND Assignment_ID = @a_id;
 ELSE
 	INSERT INTO Gradebook (Student_ID, Assignment_ID, Grade) values (@s_id, @a_id, grade);
 END IF;
@@ -272,13 +272,19 @@ JOIN Category ON (Assignments.Category_ID = Category.Category_ID)
 WHERE Category.Class_ID = '21';
 #gradebook
 
+Select Students.Student_ID, Students.Username, Count(*) as Grade
+FROM Students Right Join Gradebook on (Students.Student_ID = Gradebook.Student_ID),
+Gradebook g1 JOIN Assignments on (Assignments.Assignment_ID = g1.Assignment_ID),
+Assignments a1 JOIN Class on (a1.Class_ID = Class.Class_ID)
+WHERE C_Status = 'active'
+GROUP BY Students.Student_ID;
 
 
 call show_students('21');
-call show_assignment('21');
+call show_assignment();
 call show_categories('21');
 select * 
 from Enrolled;
-select * from Gradebook;
+Select * From Gradebook;
 
 
