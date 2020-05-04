@@ -160,9 +160,9 @@ DELIMITER ;
 
 
 DELIMITER $$
-CREATE PROCEDURE add_category(in c_id INTEGER, cat_name VARCHAR(20), weight Double)
+CREATE PROCEDURE add_category(in cat_name VARCHAR(20), weight Double)
 BEGIN
-INSERT INTO Category (Class_ID, Category_Name, Weight) values (c_id, cat_name, weight);
+INSERT INTO Category (Class_ID, Category_Name, Weight) values ((select Class_ID from Class where C_Status = 'Active'), cat_name, weight);
 END $$
 DELIMITER ;
 
@@ -180,9 +180,9 @@ DELIMITER ;
 
 
 DELIMITER $$
-CREATE PROCEDURE add_assignment(in c_id INTEGER, a_name VARCHAR(50), cat_name VARCHAR(20), a_des TINYTEXT, points INTEGER)
+CREATE PROCEDURE add_assignment(in a_name VARCHAR(50), cat_name VARCHAR(20), a_des TINYTEXT, points INTEGER)
 BEGIN
-Insert into Assignments(Class_ID, A_Name, Category_ID, A_Description, Points) values (c_id, a_name, 
+Insert into Assignments(Class_ID, A_Name, Category_ID, A_Description, Points) values ((select Class_ID from Class where C_Status = 'Active'), a_name, 
 (select Category_ID 
 from Category 
 where Category_Name = cat_name AND Class_ID = c_id), a_des, points);
@@ -190,7 +190,7 @@ END $$
 DELIMITER ;
 
 DELIMITER $$
-CREATE PROCEDURE add_student(in c_id INTEGER, uname VARCHAR(50), s_id INTEGER, lName VARCHAR(50), fName VARCHAR(50))
+CREATE PROCEDURE add_student(in uname VARCHAR(50), s_id INTEGER, lName VARCHAR(50), fName VARCHAR(50))
 BEGIN
 	SET @checkgivenname = (Select Student_ID from Students WHERE Username = uname && S_LName = lName && S_FName = fName);
     SET @usernameexits = (Select Username from Students WHERE Username = uname);
@@ -200,20 +200,21 @@ BEGIN
 	ELSEIF ((@usernameexits is NULL || @usernameexits='') && (@checkgivenname is NULL || @checkgivenname='')) THEN
 		INSERT INTO Students (S_FName, S_LName, Username) values(fName, lName, uname);
     END IF;
-    INSERT INTO Enrolled (Class_ID, Student_ID) values (c_id,s_id);
+    INSERT INTO Enrolled (Class_ID, Student_ID) values ((select Class_ID from Class where C_Status = 'Active'), s_id);
 END $$
 DELIMITER ;
 
 
 DELIMITER $$
-CREATE PROCEDURE add_student2(in c_id INTEGER, uname VARCHAR(50))
+CREATE PROCEDURE add_student2(in uname VARCHAR(50))
 BEGIN
 	DECLARE EXIT HANDLER FOR 1048
 	BEGIN
 		SELECT 'Username was not found.';
 	END;
     
-INSERT INTO Enrolled (Class_ID, Student_ID) values (c_id,(Select Student_ID From Students Where Username = uname));
+INSERT INTO Enrolled (Class_ID, Student_ID) values ((select Class_ID from Class where C_Status = 'Active'),
+(Select Student_ID From Students Where Username = uname));
 
 END $$
 DELIMITER ;
@@ -236,7 +237,7 @@ BEGIN
 Select S_FName, S_LName, Username 
 FROM Students JOIN Enrolled ON (Students.Student_ID = Enrolled.Student_ID),
 Enrolled e2 JOIN Class ON (e2.Class_ID = Class.Class_ID)
-Where ((Locate(str, S_FName) > 0) || (Locate(str, S_LName)>0) || (Locate(str, Username)>0)) && C_Status = 'Active';
+Where ((Locate(str, S_FName) > 0) || (Locate(str, S_LName)>0) || (Locate(str, Username)>0)) AND C_Status = 'Active';
 END $$
 DELIMITER ;
 
@@ -248,7 +249,7 @@ SET @a_id = (Select Assignment_ID from Assignments Where A_Name = aname && Class
 SET @s_id = (Select Student_ID from Students Where Username = uname LIMIT 1);
 SET @get_points = (Select Points from Assignments JOIN Class ON (Assignments.Class_ID = Class.Class_ID)
 									Where A_Name = a_name AND C_Status = 'Active' LIMIT 1);
-SET @grade_exits = (Select Grade_ID From Gradebook Where Student_ID = @s_id && Assignment_ID = @a_id LIMIT 1);
+SET @grade_exits = (Select Grade_ID From Gradebook Where Student_ID = @s_id AND Assignment_ID = @a_id LIMIT 1);
 
 IF(grade > @get_points) THEN
 	Select CONCAT("Grade cannot be greater than ",@get_points, " points");
