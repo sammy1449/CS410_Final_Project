@@ -151,11 +151,13 @@ DELIMITER ;
 
 
 DELIMITER $$
-CREATE PROCEDURE show_categories(in c_id INTEGER)
+CREATE PROCEDURE show_categories()
 BEGIN
-SELECT * FROM Category WHERE Class_ID = c_id;
+SELECT Category_Name, Weight, Category.Class_ID FROM Category JOIN Class ON (Class.Class_ID = Category.Class_ID)
+WHERE C_Status = 'Active';
 END $$
 DELIMITER ;
+
 
 DELIMITER $$
 CREATE PROCEDURE add_category(in c_id INTEGER, cat_name VARCHAR(20), weight Double)
@@ -165,14 +167,17 @@ END $$
 DELIMITER ;
 
 DELIMITER $$
-CREATE PROCEDURE show_assignment(in c_id INTEGER)
+CREATE PROCEDURE show_assignment()
 BEGIN
-SELECT A_Name, Points, Category_Name
-FROM Assignments JOIN Category ON (Assignments.Category_ID = Category.Category_ID)
-WHERE Category.Class_ID = c_id
-GROUP BY A_Name, Points, Category_Name;
+SELECT A_Name, Points, Category.Category_Name
+FROM Assignments JOIN Category ON (Assignments.Category_ID = Category.Category_ID),
+Category c2 JOIN Class ON (c2.Class_ID = Class.Class_ID)
+WHERE C_Status = 'Active'
+GROUP BY A_Name, Points, Category.Category_Name;
 END $$
 DELIMITER ;
+
+
 
 DELIMITER $$
 CREATE PROCEDURE add_assignment(in c_id INTEGER, a_name VARCHAR(50), cat_name VARCHAR(20), a_des TINYTEXT, points INTEGER)
@@ -180,7 +185,7 @@ BEGIN
 Insert into Assignments(Class_ID, A_Name, Category_ID, A_Description, Points) values (c_id, a_name, 
 (select Category_ID 
 from Category 
-where Category_Name = cat_name && Class_ID = c_id), a_des, points);
+where Category_Name = cat_name AND Class_ID = c_id), a_des, points);
 END $$
 DELIMITER ;
 
@@ -214,30 +219,35 @@ END $$
 DELIMITER ;
 
 DELIMITER $$
-CREATE PROCEDURE show_students(in c_id INTEGER)
+CREATE PROCEDURE show_students()
 BEGIN
-SELECT Students.Student_ID, S_FName, S_LName, Username
-FROM Students JOIN Enrolled ON (Students.Student_ID = Enrolled.Student_ID)
-WHERE Class_ID = c_id;
+SELECT Students.Student_ID, S_FName, S_LName, Username, Class.Class_ID
+FROM Students JOIN Enrolled ON (Students.Student_ID = Enrolled.Student_ID),
+Enrolled e2 JOIN Class ON (e2.Class_ID = Class.Class_ID)
+WHERE C_Status = 'Active';
 END $$
 DELIMITER ;
 
+
+
 DELIMITER $$
-CREATE PROCEDURE show_students2(in c_id INTEGER, str VARCHAR(50))
+CREATE PROCEDURE show_students2(str VARCHAR(50))
 BEGIN
 Select S_FName, S_LName, Username 
-FROM Students JOIN Enrolled ON (Students.Student_ID = Enrolled.Student_ID)
-Where ((Locate(str, S_FName) > 0) || (Locate(str, S_LName)>0) || (Locate(str, Username)>0)) && Class_ID = c_id;
+FROM Students JOIN Enrolled ON (Students.Student_ID = Enrolled.Student_ID),
+Enrolled e2 JOIN Class ON (e2.Class_ID = Class.Class_ID)
+Where ((Locate(str, S_FName) > 0) || (Locate(str, S_LName)>0) || (Locate(str, Username)>0)) && C_Status = 'Active';
 END $$
 DELIMITER ;
 
 DELIMITER $$
-CREATE PROCEDURE grade(in c_id INTEGER, aname VARCHAR(50), uname VARCHAR(50), grade INTEGER)
+CREATE PROCEDURE grade(in aname VARCHAR(50), uname VARCHAR(50), grade INTEGER)
 BEGIN
 #get assignment id
 SET @a_id = (Select Assignment_ID from Assignments Where A_Name = aname && Class_ID = c_id LIMIT 1);
 SET @s_id = (Select Student_ID from Students Where Username = uname LIMIT 1);
-SET @get_points = (Select Points from Assignments Where A_Name = a_name && Class_ID = c_id LIMIT 1);
+SET @get_points = (Select Points from Assignments JOIN Class ON (Assignments.Class_ID = Class.Class_ID)
+									Where A_Name = a_name AND C_Status = 'Active' LIMIT 1);
 SET @grade_exits = (Select Grade_ID From Gradebook Where Student_ID = @s_id && Assignment_ID = @a_id LIMIT 1);
 
 IF(grade > @get_points) THEN
