@@ -1,12 +1,6 @@
 CREATE DATABASE Final;
 USE Final;
 
-DROP TABLE Class;
-DROP TABLE Students;
-DROP TABLE Assignments;
-DROP TABLE Enrolled;
-DROP TABLE Gradebook;
-
 CREATE TABLE Class (
 	Class_ID INTEGER PRIMARY KEY AUTO_INCREMENT,
     Course_Number VARCHAR(6) NOT NULL,
@@ -45,7 +39,6 @@ CREATE TABLE Category(
 	INDEX (Class_ID)
 );
 
-
 CREATE TABLE Enrolled (
 	Enrolled_ID INTEGER PRIMARY KEY AUTO_INCREMENT,
 	Class_ID INTEGER NOT NULL REFERENCES Class,
@@ -76,7 +69,6 @@ BEGIN
 END $$
 DELIMITER ;
 
-CALL New_Class('CS410', 'SP20', 1, 'Databases');
 
 DELIMITER $$
 CREATE PROCEDURE list_classes()
@@ -87,16 +79,12 @@ BEGIN
 END $$
 DELIMITER ;
 
-CALL list_classes();
-
 DELIMITER $$
 CREATE PROCEDURE select_class(in c_num VARCHAR(6))
 BEGIN
 SELECT * FROM Class WHERE Course_Number = c_num;
 END $$
 DELIMITER ;
-
-CALL select_class('CS410');
 
 DELIMITER $$
 CREATE PROCEDURE select_class2(in c_num VARCHAR(6), term VARCHAR(6))
@@ -105,8 +93,6 @@ SELECT * FROM Class WHERE Course_Number = c_num && Term = term;
 END $$
 DELIMITER ;
 
-CALL select_class2('CS410', 'SP20');
-
 DELIMITER $$
 CREATE PROCEDURE select_class3(in c_num VARCHAR(6), term VARCHAR(6), sec_num INTEGER)
 BEGIN
@@ -114,16 +100,7 @@ SELECT * FROM Class WHERE Course_Number = c_num && Term = term && Section_Number
 END $$
 DELIMITER ;
 
-CALL select_class3('CS410', 'SP20', '1');
 
-select * from Category;
-select * from Assignments;
-Select * From Class;
-Select * from Students;
-select * from Enrolled;
-select * from Gradebook;
-
-#show-categories
 DELIMITER $$
 CREATE PROCEDURE show_categories(in c_id INTEGER)
 BEGIN
@@ -131,9 +108,6 @@ SELECT * FROM Category WHERE Class_ID = c_id;
 END $$
 DELIMITER ;
 
-Call show_categories('21');
-
-#add-category Name weight
 DELIMITER $$
 CREATE PROCEDURE add_category(in c_id INTEGER, cat_name VARCHAR(20), weight Double)
 BEGIN
@@ -141,11 +115,6 @@ INSERT INTO Category (Class_ID, Category_Name, Weight) values (c_id, cat_name, w
 END $$
 DELIMITER ;
 
-Call add_category('21', 'Project', '20');
-Call add_category('21', 'Homework','35.00');
-
-
-#show-assignment
 DELIMITER $$
 CREATE PROCEDURE show_assignment(in c_id INTEGER)
 BEGIN
@@ -156,9 +125,6 @@ GROUP BY A_Name, Points, Category_Name;
 END $$
 DELIMITER ;
 
-Call show_assignment('21');
-
-#add-assignment name Category Description points
 DELIMITER $$
 CREATE PROCEDURE add_assignment(in c_id INTEGER, a_name VARCHAR(50), cat_name VARCHAR(20), a_des TINYTEXT, points INTEGER)
 BEGIN
@@ -169,39 +135,21 @@ where Category_Name = cat_name && Class_ID = c_id), a_des, points);
 END $$
 DELIMITER ;
 
-Call add_assignment('21', 'Assignment 1', 'Homework', 'ERModel Diagram', '100');
-Call add_assignment('21', 'Final Project', 'Project', 'Partner project', '100');
-
-#------------------------------
-#add-student username studentid Last First !!NOT FINISHED!!
 DELIMITER $$
 CREATE PROCEDURE add_student(in c_id INTEGER, uname VARCHAR(50), s_id INTEGER, lName VARCHAR(50), fName VARCHAR(50))
 BEGIN
-	DECLARE EXIT HANDLER FOR 1048
-	BEGIN
-		SET @checkfirstname = (Select S_FName From Students Where Username = uname);
-        SET @checklaststname = (Select S_LName From Students Where Username = uname);
-        IF (@checkfirstname != fName) || (@checklastname != lName) THEN
-			UPDATE Students SET S_FNAME = fName, S_LName = lName WHERE Username = uname;
-		ELSE
-        	INSERT INTO Students (S_FName, S_LName, Username) values (lName, fName, uname);
-			INSERT INTO Enrolled (Class_ID, Student_ID) values (c_id, s_id);
-        END IF;
-	END;
- INSERT INTO Enrolled (Class_ID, Student_ID) values (c_id,(Select Student_ID From Students Where Username = uname && S_FName = fName && S_LName = lname));
+	SET @checkgivenname = (Select Student_ID from Students WHERE Username = uname && S_LName = lName && S_FName = fName);
+    SET @usernameexits = (Select Username from Students WHERE Username = uname);
+
+    IF (@usernameexits is not null && (@checkgivenname is NULL || @checkgivenname='')) THEN
+		Update Students SET S_FName = fName, S_LName = lName Where Student_ID = s_id;
+	ELSEIF ((@usernameexits is NULL || @usernameexits='') && (@checkgivenname is NULL || @checkgivenname='')) THEN
+		INSERT INTO Students (S_FName, S_LName, Username) values(fName, lName, uname);
+    END IF;
+    INSERT INTO Enrolled (Class_ID, Student_ID) values (c_id,s_id);
 END $$
 DELIMITER ;
 
-Select * From Students Where Username = 'jd5001';
-
-INSERT INTO Enrolled (Class_ID, Student_ID) values ('21',(Select Student_ID From Students Where Username = 'jd5001' && S_FName = 'John' && S_LName = 'Doe'));
-
-call add_student('21', 'jd5001', '101','John','Daxton');
-
-#--------------------------------
-#add-student username
-#username is null, return error
-Select Student_ID From Students Where Username = 'jd5001';
 
 DELIMITER $$
 CREATE PROCEDURE add_student2(in c_id INTEGER, uname VARCHAR(50))
@@ -216,9 +164,6 @@ INSERT INTO Enrolled (Class_ID, Student_ID) values (c_id,(Select Student_ID From
 END $$
 DELIMITER ;
 
-call add_student2('21','jd5001');
-
-#show-students
 DELIMITER $$
 CREATE PROCEDURE show_students(in c_id INTEGER)
 BEGIN
@@ -228,9 +173,6 @@ WHERE Class_ID = c_id;
 END $$
 DELIMITER ;
 
-call show_students('21');
-
-#show-students string
 DELIMITER $$
 CREATE PROCEDURE show_students2(in c_id INTEGER, str VARCHAR(50))
 BEGIN
@@ -240,14 +182,39 @@ Where ((Locate(str, S_FName) > 0) || (Locate(str, S_LName)>0) || (Locate(str, Us
 END $$
 DELIMITER ;
 
-call show_students2('21', 'a');
-
-#grade assignment username grade
-
-#grade assignmentname username grade
+DELIMITER $$
+CREATE PROCEDURE grade(in c_id INTEGER, a_name VARCHAR(50), uname VARCHAR(50), grade INTEGER)
+BEGIN
+SET @a_id = (Select Assignment_ID from Assignments Where A_Name = a_name && Class_ID = c_id LIMIT 1);
+SET @s_id = (Select Student_ID from Students Where Username = uname LIMIT 1);
+SET @get_points = (Select Points from Assignments Where A_Name = a_name && Class_ID = c_id LIMIT 1);
+SET @emptytablecheck = (Select Grade_ID From Gradebook LIMIT 1);
+SET @grade_exits = (Select Grade_ID From Gradebook Where Student_ID = @s_id && Assignment_ID = @a_id);
+IF(grade > @get_points) THEN
+	Select CONCAT("Grade cannot be greater than ",@get_points, " points");
+ELSEIF (@emptytablecheck is NULL || @emptytablecheck='') THEN
+	INSERT INTO Gradebook (Student_ID, Assignment_ID, Grade) values (@s_id, @a_id, grade);
+ELSEIF (@grade_exits) THEN
+	UPDATE Gradebook SET Grade = grade WHERE Student_ID = @s_id;
+ELSE
+	INSERT INTO Gradebook (Student_ID, Assignment_ID, Grade) values (@s_id, @a_id, grade);
+END IF;
+END $$
+DELIMITER ;
 
 #student-grades username
 
+
+
 #gradebook
 
+
+call show_students('21');
+
+select * from Category;
+select * from Assignments;
+Select * From Class;
+Select * from Students;
+select * from Enrolled;
+select * from Gradebook;
 
