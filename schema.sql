@@ -205,7 +205,7 @@ DELIMITER ;
 DELIMITER $$
 CREATE PROCEDURE show_students2(str VARCHAR(50))
 BEGIN
-Select Students.Stunde_ID, S_FName, S_LName, Username 
+Select Students.Student_ID, S_FName, S_LName, Username 
 FROM Students RIGHT JOIN Enrolled ON (Students.Student_ID = Enrolled.Student_ID)
 JOIN Class ON (Enrolled.Class_ID = Class.Class_ID)
 Where ((Locate(str, S_FName) > 0) OR (Locate(str, S_LName)>0) OR (Locate(str, Username)>0)) AND C_Status = 'Active';
