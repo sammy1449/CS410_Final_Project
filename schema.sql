@@ -2,15 +2,6 @@ CREATE DATABASE Final;
 USE Final;
 SET SQL_SAFE_UPDATES = 0;
 
-Drop Table Class;
-Drop Table Students;
-Drop Table Assignments;
-Drop Table Category;
-Drop Table Enrolled;
-Drop table Gradebook;
-
-
-
 CREATE TABLE Class (
 	Class_ID INTEGER PRIMARY KEY AUTO_INCREMENT,
     Course_Number VARCHAR(6) NOT NULL,
@@ -36,7 +27,6 @@ CREATE TABLE Category(
 	INDEX (Class_ID)
 );
 
-
 CREATE TABLE Assignments (
 	Assignment_ID INTEGER PRIMARY KEY AUTO_INCREMENT,
     Class_ID INTEGER NOT NULL REFERENCES Class,
@@ -50,7 +40,6 @@ CREATE TABLE Assignments (
 	FOREIGN KEY (Class_ID) REFERENCES Class (Class_ID),
 	INDEX (Class_ID)
 );
-
 
 CREATE TABLE Enrolled (
 	Enrolled_ID INTEGER PRIMARY KEY AUTO_INCREMENT,
@@ -82,9 +71,6 @@ BEGIN
 END $$
 DELIMITER ;
 
-call new_class ('CS421', 'Sp19', 2, 'Algorithms');
-
-
 DELIMITER $$
 CREATE PROCEDURE list_classes()
 BEGIN
@@ -114,12 +100,6 @@ Select Course_Number from Class Where C_Status = 'Active';
 END $$
 DELIMITER ;
 
-call show_class();
-Select Course_Number from Class Where C_Status = 'Active';
-
-call select_class('AAB518');
-Select * from Class;
-
 DELIMITER $$
 CREATE PROCEDURE select_class2(in c_num VARCHAR(6), term VARCHAR(6))
 BEGIN
@@ -132,9 +112,6 @@ ELSE
 END IF;
 END $$
 DELIMITER ;
-
-call select_class2('CS421', 'Sp19');
-
 
 DELIMITER $$
 CREATE PROCEDURE select_class3(in c_num VARCHAR(6), term VARCHAR(6), sec_num INTEGER)
@@ -149,7 +126,6 @@ END IF;
 END $$
 DELIMITER ;
 
-
 DELIMITER $$
 CREATE PROCEDURE show_categories()
 BEGIN
@@ -157,7 +133,6 @@ SELECT Category_Name, Weight, Category.Class_ID FROM Category JOIN Class ON (Cla
 WHERE C_Status = 'Active';
 END $$
 DELIMITER ;
-
 
 DELIMITER $$
 CREATE PROCEDURE add_category(in cat_name VARCHAR(20), weight Double)
@@ -176,8 +151,6 @@ WHERE C_Status = 'Active'
 GROUP BY A_Name, Points, Category.Category_Name;
 END $$
 DELIMITER ;
-
-
 
 DELIMITER $$
 CREATE PROCEDURE add_assignment(in a_name VARCHAR(50), cat_name VARCHAR(20), a_des TINYTEXT, points INTEGER)
@@ -228,19 +201,6 @@ Enrolled e2 JOIN Class ON (e2.Class_ID = Class.Class_ID)
 WHERE C_Status = 'Active';
 END $$
 DELIMITER ;
-
-DROP PROCEDURE show_students;
-
-SELECT Enrolled.Student_ID, S_FName, S_LName, Username, Class.Class_ID
-FROM Students LEFT JOIN Enrolled ON (Students.Student_ID = Enrolled.Student_ID),
-Enrolled e2 JOIN Class ON (e2.Class_ID = Class.Class_ID)
-WHERE C_Status = 'Active';
-
-
-
-call show_class();
-call show_students();
-call show_students2('vale');
 
 DELIMITER $$
 CREATE PROCEDURE show_students2(str VARCHAR(50))
@@ -293,7 +253,6 @@ JOIN Class ON (Category.Class_ID = Class.Class_ID)
 WHERE C_Status = 'Active' AND Username = uname;
 END $$
 DELIMITER ;
-call student_grades('aubreybohn');
 
 DELIMITER $$
 #gradebook
@@ -308,14 +267,3 @@ WHERE C_Status = 'Active'
 GROUP BY Students.Student_ID;
 END $$
 DELIMITER ;
-
-call gradebook();
-
-call show_students();
-call show_assignment();
-call show_categories('21');
-select * 
-from Enrolled;
-Select * From Gradebook;
-
-
