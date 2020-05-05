@@ -24,6 +24,7 @@ COMPILING AND RUNNING:
 To compile (must be on ONYX):
 
 $ export CLASSPATH=/opt/mysql/mysql-connector-java-8.0.18.jar:.:$CLASSPATH
+
 $ javac FinalProject.java
 
 To run:
