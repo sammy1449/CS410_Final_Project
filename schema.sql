@@ -270,11 +270,12 @@ FROM Students Right Join Gradebook on (Students.Student_ID = Gradebook.Student_I
 Right Join Assignments on (Assignments.Assignment_ID = Gradebook.Assignment_ID)
 JOIN Category ON (Assignments.Category_ID = Category.Category_ID)
 JOIN Class ON (Category.Class_ID = Class.Class_ID)
-WHERE C_Status = 'Active';
+WHERE C_Status = 'Active' AND Username = 'samanthamaxey299'
+GROUP BY Category_Name;
 
 #gradebook
 
-Select Students.Student_ID, Students.Username, Count(*) as Grade
+Select Students.Student_ID, Students.S_FName, Students.Username, Count(*) as Grade
 FROM Students Right Join Gradebook on (Students.Student_ID = Gradebook.Student_ID),
 Gradebook g1 JOIN Assignments on (Assignments.Assignment_ID = g1.Assignment_ID),
 Assignments a1 JOIN Class on (a1.Class_ID = Class.Class_ID)
