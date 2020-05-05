@@ -237,6 +237,8 @@ Enrolled e2 JOIN Class ON (e2.Class_ID = Class.Class_ID)
 WHERE C_Status = 'Active';
 
 
+
+call show_class();
 call show_students();
 call show_students2('vale');
 
@@ -273,14 +275,25 @@ END $$
 DELIMITER ;
 
 #student-grades username
-
-SELECT Username, (((Gradebook.Grade) / (Assignments.Points))*100) as Assignment_Grade, 
-Assignments.A_Name, Gradebook.Grade as Points_Earned, Assignments.Points as Points_Possible, Category.Category_Name
+DELIMITER $$
+CREATE PROCEDURE student_grades(in uname VARCHAR(50))
+BEGIN
+SET @grade = (Select ((SUM(Gradebook.Grade) / SUM(Assignments.Points))*100) as Grade
+FROM Students Right Join Gradebook on (Students.Student_ID = Gradebook.Student_ID),
+Gradebook g1 JOIN Assignments on (Assignments.Assignment_ID = g1.Assignment_ID),
+Assignments a1 JOIN Class on (a1.Class_ID = Class.Class_ID)
+WHERE C_Status = 'Active'
+GROUP BY Students.Student_ID);
+SELECT Students.Student_ID,Username,(((Gradebook.Grade) / (Assignments.Points))*100) as Assignment_Grade, 
+Assignments.A_Name, Gradebook.Grade as Points_Earned, Assignments.Points as Points_Possible, Category.Category_Name, @grade as Final_Grade
 FROM Students Right Join Gradebook on (Students.Student_ID = Gradebook.Student_ID)
 Right Join Assignments on (Assignments.Assignment_ID = Gradebook.Assignment_ID)
 JOIN Category ON (Assignments.Category_ID = Category.Category_ID)
 JOIN Class ON (Category.Class_ID = Class.Class_ID)
-WHERE C_Status = 'Active' AND Username = 'samanthamaxey299';
+WHERE C_Status = 'Active' AND Username = uname;
+END $$
+DELIMITER ;
+call student_grades('aubreybohn');
 
 DELIMITER $$
 #gradebook
@@ -296,7 +309,7 @@ GROUP BY Students.Student_ID;
 END $$
 DELIMITER ;
 
-
+call gradebook();
 
 call show_students();
 call show_assignment();
