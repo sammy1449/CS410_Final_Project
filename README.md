@@ -45,7 +45,7 @@ We did extensive testing in both Java and mySQL, checking to make sure that the 
 
 DISCUSSION:
  
-The difficult part was trying to get the grade portion of the project oriented in the way that she had worded she wanted it. It was difficult to try and get the student-grades to cooperate the way we wanted to with the 'complete' class grade that was required. We found a work around since we had gotten gradebook working which is essentially what that column would be. Another thing that we learned about was the SET and IF statements that we could use within the procedure. This was new to us and a very useful tool. 
+The difficult part was trying to get the grade portion of the project oriented in the way that she had worded she wanted it. It was difficult to try and get the student-grades to cooperate the way we wanted to with the 'complete' class grade that was required. We found a work around since we had gotten gradebook working which is essentially what that column would be. Another thing that we learned about was the SET and IF statements that we could use within the procedure. This was new to us and a very useful tool. Later on, we had decided it would be easier to have a separate table for Categories than having it as just an attribute for assignments. This differs in our original E-R Model and was not included in it.
  
 EXTRA CREDIT:
 N/A
