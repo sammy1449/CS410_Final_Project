@@ -897,7 +897,7 @@ class project {
 			  System.out.println ("Usage :   show-students");
 			  System.out.println ("Usage :   show-students2 <String>");
 			  System.out.println ("Usage :   grade <AName> <Username> <Grade>");
-			  System.out.println ("Usage :   student_grades <Username>");
+			  System.out.println ("Usage :   student-grades <Username>");
 			  System.out.println ("Usage :   gradebook");
 			  return;
 			}
