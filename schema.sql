@@ -222,20 +222,29 @@ DELIMITER ;
 DELIMITER $$
 CREATE PROCEDURE show_students()
 BEGIN
-SELECT Students.Student_ID, S_FName, S_LName, Username, Class.Class_ID
-FROM Students JOIN Enrolled ON (Students.Student_ID = Enrolled.Student_ID),
+SELECT Enrolled.Student_ID, S_FName, S_LName, Username, Class.Class_ID
+FROM Students LEFT JOIN Enrolled ON (Students.Student_ID = Enrolled.Student_ID),
 Enrolled e2 JOIN Class ON (e2.Class_ID = Class.Class_ID)
 WHERE C_Status = 'Active';
 END $$
 DELIMITER ;
 
+DROP PROCEDURE show_students;
 
+SELECT Enrolled.Student_ID, S_FName, S_LName, Username, Class.Class_ID
+FROM Students LEFT JOIN Enrolled ON (Students.Student_ID = Enrolled.Student_ID),
+Enrolled e2 JOIN Class ON (e2.Class_ID = Class.Class_ID)
+WHERE C_Status = 'Active';
+
+
+call show_students();
+call show_students2('vale');
 
 DELIMITER $$
 CREATE PROCEDURE show_students2(str VARCHAR(50))
 BEGIN
 Select S_FName, S_LName, Username 
-FROM Students JOIN Enrolled ON (Students.Student_ID = Enrolled.Student_ID),
+FROM Students RIGHT JOIN Enrolled ON (Students.Student_ID = Enrolled.Student_ID),
 Enrolled e2 JOIN Class ON (e2.Class_ID = Class.Class_ID)
 Where ((Locate(str, S_FName) > 0) OR (Locate(str, S_LName)>0) OR (Locate(str, Username)>0)) AND C_Status = 'Active';
 END $$
@@ -265,25 +274,31 @@ DELIMITER ;
 
 #student-grades username
 
-SELECT Username, Grade, A_Name, Points, Category_Name
+SELECT Username, (((Gradebook.Grade) / (Assignments.Points))*100) as Assignment_Grade, 
+Assignments.A_Name, Gradebook.Grade as Points_Earned, Assignments.Points as Points_Possible, Category.Category_Name
 FROM Students Right Join Gradebook on (Students.Student_ID = Gradebook.Student_ID)
 Right Join Assignments on (Assignments.Assignment_ID = Gradebook.Assignment_ID)
 JOIN Category ON (Assignments.Category_ID = Category.Category_ID)
 JOIN Class ON (Category.Class_ID = Class.Class_ID)
-WHERE C_Status = 'Active' AND Username = 'samanthamaxey299'
-GROUP BY Category_Name;
+WHERE C_Status = 'Active' AND Username = 'samanthamaxey299';
 
+DELIMITER $$
 #gradebook
-
-Select Students.Student_ID, Students.S_FName, Students.Username, Count(*) as Grade
+CREATE PROCEDURE gradebook()
+BEGIN
+Select Students.Student_ID, Students.S_LName, Students.Username, SUM(Gradebook.Grade) as Total_Points_Earned, 
+((SUM(Gradebook.Grade) / SUM(Assignments.Points))*100) as Grade
 FROM Students Right Join Gradebook on (Students.Student_ID = Gradebook.Student_ID),
 Gradebook g1 JOIN Assignments on (Assignments.Assignment_ID = g1.Assignment_ID),
 Assignments a1 JOIN Class on (a1.Class_ID = Class.Class_ID)
 WHERE C_Status = 'Active'
 GROUP BY Students.Student_ID;
+END $$
+DELIMITER ;
 
 
-call show_students('21');
+
+call show_students();
 call show_assignment();
 call show_categories('21');
 select * 
